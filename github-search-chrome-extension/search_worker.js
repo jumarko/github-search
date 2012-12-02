@@ -1,19 +1,18 @@
 
 self.onmessage = function(event) {
     if (event.data) {
-        var repositoryName = event.data;
-        searchInRepository(repositoryName);
+        searchInRepository(event.data.repositoryName, event.data.query);
     }
 }
 
-function searchInRepository(repositoryName) {
+function searchInRepository(repositoryName, query) {
     var req = new XMLHttpRequest();
     req.open(
         "GET",
-        "https://github.com/" + repositoryName + "/search?q=HttpTemplate",
+        "https://github.com/" + repositoryName + "/search?q=" + query,
         true);
     req.onload = function () {
-        postMessage(req.responseText);
+        postMessage({ searchResultHtml : req.responseText });
     }
 
     req.send(null);

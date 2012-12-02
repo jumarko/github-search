@@ -82,15 +82,50 @@ var ALL_GOODDATA_REPOSITORIES = [
 // ------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------
 
+
+// ------------------------- JQUERY --------------------------
+
+$(document).ready(function() {
+    $("form").submit(function() {
+        // user must prefixed query with "all:" to do global search across all repos
+
+        // TODO:the original search box is not supported - user must continue to the "advanced search page"
+//        var searchQueryString = $('input[placeholder*="Search source code"]').val();
+        var searchQueryString;
+        if ($('input[placeholder="Search..."]')) {
+            searchQueryString = $('input[placeholder="Search..."]').val();
+        } else if ($('input[placeholder*="Search source code"]')) {
+            searchQueryString = $('input[placeholder="Search source code"]').val();
+        }
+//        window.alert("Search with jquery querystring=" + searchQueryString);
+        if (searchQueryString && searchQueryString.match(/all:.+/)) {
+            var allReposSearchQuery = searchQueryString.substring(4);
+//            window.alert("Search in all repos query=" + allReposSearchQuery );
+            searchInAllRepositories(allReposSearchQuery);
+            return false;
+        }
+
+        // pass logic to normal repo search
+        return true;
+    });
+});
+// ------------------------- End Of JQUERY --------------------------
+
+
+
+
+
+
+function searchInAllRepositories(searchQuery) {
     for (var repo in ALL_GOODDATA_REPOSITORIES) {
         var repository = ALL_GOODDATA_REPOSITORIES[repo];
-        chrome.extension.sendRequest( {
+        chrome.extension.sendRequest({
             action: 'search_in_repo',
-            repositoryName : repository
-        }, function(searchResult) {
-//            window.alert("search result body from background scrip received=" + searchResult.text);
-
-            var searchResultBody = getSearchResultElement(searchResult.text, "files");
+            repositoryName: repository,
+            query: searchQuery
+        }, function (searchResult) {
+            var searchResultBody = getSearchResultElement(searchResult.html, "files");
+//            window.alert("search result body=" + searchResultBody);
             if (searchResultBody) {
                 var searchResultEnvelope = document.createElement("h2");
                 searchResultEnvelope.textContent = "Search result for " + searchResult.repository;
@@ -102,16 +137,17 @@ var ALL_GOODDATA_REPOSITORIES = [
     }
 
 
-
-
+}
 
 
 // ------------------------------------------- String 2 DOM ------------------------------------------------------------
 // ---------------------------------------------------------------------------------------------------------------------
 
 function getSearchResultElement(htmlText, elementId) {
-
+//    window.alert("Search result=" + htmlText);
+    console.log("Search result="+ htmlText);
     var htmlDocument = string2dom(htmlText)["doc"];
+//    window.alert("Search result html document=" + htmlDocument);
     return htmlDocument.getElementById(elementId);
 
 //    var matchingElements = [];
@@ -126,9 +162,6 @@ function getSearchResultElement(htmlText, elementId) {
 //    }
 //    return matchingElements;
 }
-
-
-
 
 
 /*

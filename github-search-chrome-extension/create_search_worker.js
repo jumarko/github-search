@@ -1,4 +1,12 @@
 /*
+ * Add request listener for listening message comming from content script to this background worker.
+ */
+
+chrome.extension.onRequest.addListener(onRequest);
+
+
+
+/*
  * Handles data sent via chrome.extension.sendRequest().
  * @param request Object Data sent in the request.
  * @param sender Object Origin of the request.
@@ -9,17 +17,14 @@
 function onRequest(request, sender, sendSearchResultResponse) {
     if (request.action === 'search_in_repo') {
         var searchWorker = createWorker(sendSearchResultResponse, request.repositoryName);
-//        window.alert("Posting message to worker in background script repo="  + request.repositoryName);
-        searchWorker.postMessage(request.repositoryName);
+        var searchData = {
+            'repositoryName' : request.repositoryName,
+            'query' : request.query
+        };
+//        window.alert("Posting message to worker in background script data" + searchData);
+        searchWorker.postMessage(searchData);
     }
-};
-
-/*
- * Add request listener
- */
-
-chrome.extension.onRequest.addListener(onRequest);
-
+}
 
 
 function createWorker(sendSearchResultResponse, repositoryName) {
@@ -29,14 +34,14 @@ function createWorker(sendSearchResultResponse, repositoryName) {
 //        window.alert("Message from worker received!" + event.data);
 //    };
     searchWorker.addEventListener('message', function (event) {
-//        window.alert("result from search worker received!");
+//        window.alert("result from repository=" + repositoryName +" search worker received!\n" + event.data);
         sendSearchResultResponse({
             repository : repositoryName,
-            text : event.data});
+            html : event.data.searchResultHtml });
     }, false);
 
     searchWorker.addEventListener('error', function (event) {
-        window.alert("error from search worker received!" + event.message);
+//        window.alert("error from search worker received!" + event.message);
     }, false);
     return searchWorker;
 }

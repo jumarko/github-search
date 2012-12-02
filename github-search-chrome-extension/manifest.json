@@ -14,7 +14,7 @@
   "content_scripts": [
     {
       "matches": ["https://github.com/*"],
-      "js": ["search_on_page.js"]
+      "js": ["jquery-1.8.3.min.js", "search_on_page.js"]
     }
   ],
   "permissions": [
