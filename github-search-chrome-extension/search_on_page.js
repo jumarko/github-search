@@ -82,27 +82,32 @@ var ALL_GOODDATA_REPOSITORIES = [
 // ------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------
 
+    for (var repo in ALL_GOODDATA_REPOSITORIES) {
+        var repository = ALL_GOODDATA_REPOSITORIES[repo];
+        chrome.extension.sendRequest( {
+            action: 'search_in_repo',
+            repositoryName : repository
+        }, function(searchResult) {
+//            window.alert("search result body from background scrip received=" + searchResult.text);
 
-for (var repo in ALL_GOODDATA_REPOSITORIES) {
-    var req = new XMLHttpRequest();
-    var repository = ALL_GOODDATA_REPOSITORIES[repo];
-    req.open(
-        "GET",
-        "https://github.com/" + repository + "/search?q=HttpTemplate",
-        true);
-    req.onload = function () {
-        var searchResultDiv = getSearchResultElement(req.responseText, "files");
-        if (searchResultDiv) {
-            var searchResultEnvelope = document.createElement("h2");
-            searchResultEnvelope.textContent = "Search result for " + repository;
-            searchResultEnvelope.appendChild(searchResultDiv);
-            document.body.appendChild(searchResultEnvelope);
-        }
+            var searchResultBody = getSearchResultElement(searchResult.text, "files");
+            if (searchResultBody) {
+                var searchResultEnvelope = document.createElement("h2");
+                searchResultEnvelope.textContent = "Search result for " + searchResult.repository;
+                searchResultEnvelope.appendChild(searchResultBody);
+//                window.alert("search result envelope=" + searchResultEnvelope);
+                document.body.appendChild(searchResultEnvelope);
+            }
+        });
     }
 
-    req.send(null);
-}
 
+
+
+
+
+// ------------------------------------------- String 2 DOM ------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 function getSearchResultElement(htmlText, elementId) {
 
@@ -121,6 +126,9 @@ function getSearchResultElement(htmlText, elementId) {
 //    }
 //    return matchingElements;
 }
+
+
+
 
 
 /*
