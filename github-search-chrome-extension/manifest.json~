@@ -1,0 +1,21 @@
+{
+  "name": "Github repositories code search extension",
+  "version": "1.0",
+  "manifest_version": 2,
+  "description": "The first extension that I made.",
+  "browser_action": {
+    "default_title": "Github search",
+    "default_icon": "icon.png",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://github.com/*"],
+      "js": ["search_on_page.js"]
+    }
+  ],
+  "permissions": [
+    "http://api.github.com/",
+    "http://github.com/"
+  ]
+}
