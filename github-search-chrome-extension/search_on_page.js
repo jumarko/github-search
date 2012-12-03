@@ -85,17 +85,46 @@ var ALL_GOODDATA_REPOSITORIES = [
 
 // ------------------------- JQUERY --------------------------
 
+function getRepoAdvancedSearchBoxValue() {
+    return $('input[placeholder="Search..."]').val();
+}
+function getRepoBasicSearchBoxValue() {
+    return $('input[placeholder*="Search source code"]').val();
+}
+function getTopLevelBasicSearchBoxValue() {
+    if ($('input[name="q"]') && $('input[name="q"]').length > 0) {
+        return $('input[name="q"]')[0].value;
+    }
+    // TODO: following does not work
+//    return $('input[placeholder="Search source code"]').val();
+}
+
+function getTopLevelAdvancedSearchBoxValue() {
+    if ($('input[name="q"]') && $('input[name="q"]').length > 1) {
+        return $('input[name="q"]')[1].value;
+    }
+
+    // TODO: following does not work
+//    return $('input[placeholder="Search or type a command"]').val();
+}
+
+
 $(document).ready(function() {
     $("form").submit(function() {
         // user must prefixed query with "all:" to do global search across all repos
 
         var searchQueryString;
-        if ($('input[placeholder="Search..."]').val()) {
-            searchQueryString = $('input[placeholder="Search..."]').val();
-        } else if ($('input[placeholder*="Search source code"]').val()) {
-            searchQueryString = $('input[placeholder*="Search source code"]').val();
+        if (getRepoAdvancedSearchBoxValue()) {
+            searchQueryString = getRepoAdvancedSearchBoxValue();
+        } else if (getRepoBasicSearchBoxValue()) {
+            searchQueryString = getRepoBasicSearchBoxValue()
+        // TODO: top level search box don't work right now
+        } else if (getTopLevelAdvancedSearchBoxValue()) {
+            searchQueryString = getTopLevelAdvancedSearchBoxValue();
+        } else if (getTopLevelBasicSearchBoxValue()) {
+            searchQueryString = getTopLevelBasicSearchBoxValue();
         }
-        window.alert("Search with jquery querystring=" + searchQueryString);
+//        window.alert("Search with jquery querystring=" + searchQueryString);
         if (searchQueryString && searchQueryString.match(/all:.+/)) {
             var allReposSearchQuery = searchQueryString.substring(4);
 //            window.alert("Search in all repos query=" + allReposSearchQuery );
@@ -126,8 +155,16 @@ function searchInAllRepositories(searchQuery) {
 //            window.alert("search result body=" + searchResultBody);
             if (searchResultBody) {
                 var searchResultEnvelope = document.createElement("h2");
+
                 searchResultEnvelope.textContent = "Search result for " + searchResult.repository;
                 searchResultEnvelope.appendChild(searchResultBody);
+
+                // separate more cleanly from other repository search results via more empty new lines
+                searchResultEnvelope.appendChild(searchResultBody);
+                searchResultEnvelope.appendChild(document.createElement("br"));
+                searchResultEnvelope.appendChild(document.createElement("br"));
+                searchResultEnvelope.appendChild(document.createElement("br"));
+
 //                window.alert("search result envelope=" + searchResultEnvelope);
                 document.body.appendChild(searchResultEnvelope);
             }
