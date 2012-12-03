@@ -89,15 +89,13 @@ $(document).ready(function() {
     $("form").submit(function() {
         // user must prefixed query with "all:" to do global search across all repos
 
-        // TODO:the original search box is not supported - user must continue to the "advanced search page"
-//        var searchQueryString = $('input[placeholder*="Search source code"]').val();
         var searchQueryString;
-        if ($('input[placeholder="Search..."]')) {
+        if ($('input[placeholder="Search..."]').val()) {
             searchQueryString = $('input[placeholder="Search..."]').val();
-        } else if ($('input[placeholder*="Search source code"]')) {
-            searchQueryString = $('input[placeholder="Search source code"]').val();
+        } else if ($('input[placeholder*="Search source code"]').val()) {
+            searchQueryString = $('input[placeholder*="Search source code"]').val();
         }
-//        window.alert("Search with jquery querystring=" + searchQueryString);
+        window.alert("Search with jquery querystring=" + searchQueryString);
         if (searchQueryString && searchQueryString.match(/all:.+/)) {
             var allReposSearchQuery = searchQueryString.substring(4);
 //            window.alert("Search in all repos query=" + allReposSearchQuery );
