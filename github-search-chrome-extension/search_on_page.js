@@ -168,6 +168,10 @@ $(document).ready(function() {
 
 
 function searchInAllRepositories(searchQuery) {
+    function changeToValidId(string) {
+        return string.replace(/\//g, "_");
+    }
+
     for (var repo in ALL_GOODDATA_REPOSITORIES) {
         var repository = ALL_GOODDATA_REPOSITORIES[repo];
         chrome.extension.sendRequest({
@@ -178,7 +182,15 @@ function searchInAllRepositories(searchQuery) {
             var searchResultBody = getSearchResultElement(searchResult.html, "files");
 //            window.alert("search result body=" + searchResultBody);
             if (searchResultBody) {
-                var searchResultEnvelope = $("<h2>Search result for " + searchResult.repository + "</h2>");;
+
+                // remove previous results
+                var searchResultsElementId = "searchResultsFor_" + changeToValidId(searchResult.repository);
+//                // TODO: remove always cause an error
+                $("#" + searchResultsElementId).remove();
+
+                var searchResultEnvelope = $('<div id="' + searchResultsElementId + '">');
+                var searchResultTitle = $("<h2>Search result for " + searchResult.repository + "</h2>");
+                $(searchResultEnvelope).append(searchResultTitle);
                 $(searchResultEnvelope).append(searchResultBody);
 
                 // separate more cleanly from other repository search results via more empty new lines
