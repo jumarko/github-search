@@ -16,9 +16,9 @@ chrome.extension.onRequest.addListener(onRequest);
 
 function onRequest(request, sender, sendSearchResultResponse) {
     if (request.action === 'search_in_repo') {
-        var searchWorker = createWorker(sendSearchResultResponse, request.repositoryName);
+        var searchWorker = createWorker(sendSearchResultResponse, request.repositoryRelativeUrl);
         var searchData = {
-            'repositoryName' : request.repositoryName,
+            'repositoryRelativeUrl' : request.repositoryRelativeUrl,
             'query' : request.query
         };
 //        window.alert("Posting message to worker in background script data" + searchData);
@@ -27,16 +27,16 @@ function onRequest(request, sender, sendSearchResultResponse) {
 }
 
 
-function createWorker(sendSearchResultResponse, repositoryName) {
+function createWorker(sendSearchResultResponse, repositoryRelativeUrl) {
     var searchWorker = new Worker("search_worker.js");
 //    searchWorker.onmessage = function(event) {
 //        // TODO:
 //        window.alert("Message from worker received!" + event.data);
 //    };
     searchWorker.addEventListener('message', function (event) {
-//        window.alert("result from repository=" + repositoryName +" search worker received!\n" + event.data);
+//        window.alert("result from repository=" + repositoryRelativeUrl +" search worker received!\n" + event.data);
         sendSearchResultResponse({
-            repository : repositoryName,
+            repository : repositoryRelativeUrl,
             html : event.data.searchResultHtml });
     }, false);
 
