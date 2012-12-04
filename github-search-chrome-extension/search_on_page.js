@@ -189,7 +189,8 @@ function searchInAllRepositories(searchQuery) {
                 $("#" + searchResultsElementId).remove();
 
                 var searchResultEnvelope = $('<div id="' + searchResultsElementId + '">');
-                var searchResultTitle = $("<h2>Search result for " + searchResult.repository + "</h2>");
+                var searchResultTitle = $('<h2>Search result for query=<i>"' + searchQuery
+                                                + '</i>" in repository=<i>"' + searchResult.repository + '"</i></h2>');
                 $(searchResultEnvelope).append(searchResultTitle);
                 $(searchResultEnvelope).append(searchResultBody);
 
