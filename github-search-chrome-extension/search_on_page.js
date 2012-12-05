@@ -1,27 +1,53 @@
-var ORGANIZATION_NAME = "gooddata";
+var ORGANIZATION_NAME;
+var ALL_ORGANIZATION_REPOSITORIES;
 
-function loadAllOrganizationRepositories() {
-    var repositoriesRequest = $.ajax({
-        type: "GET",
-        url: "https://github.com/organizations/" + ORGANIZATION_NAME + "/ajax_your_repos",
-        dataType: "html"
-    });
-
-    var organizationRepoNameRegex = new RegExp("^\/" + ORGANIZATION_NAME + "\/.+");
-
-    repositoriesRequest.done(function (responseHtml) {
-        var repositoryRelativeUrls = [ ];
-        $(responseHtml).find('a').each(function () {
-            var repoName = $(this).attr("href");
-            if (repoName && repoName.match(organizationRepoNameRegex)) {
-                repositoryRelativeUrls.push(repoName);
-            }
+function loadOrganization() {
+    /**
+     * Load name of github organization from saved options - user can changed this value, default is 'gooddata'.
+     * @see background.js
+     */
+    function loadOrganizationNameFromOptions() {
+        chrome.extension.sendRequest({
+            action: 'get_organization_name'
+        }, function (result) {
+            ORGANIZATION_NAME = result.organizationName;
+            // load repositories can be called only after we have organization name
+            loadOrganizationRepositories(ORGANIZATION_NAME);
         });
-        ALL_ORGANIZATION_REPOSITORIES = repositoryRelativeUrls;
-    });
+    }
+
+    /**
+     * Loads all organization's repositories which are accessible by current user logged in GitHub.
+     * @param organizationName name of GitHub organization
+     * @see #loadOrganizationNameFromOptions - this function is called from it
+     */
+    function loadOrganizationRepositories(organizationName) {
+        var repositoriesRequest = $.ajax({
+            type: "GET",
+            url: "https://github.com/organizations/" + organizationName + "/ajax_your_repos",
+            dataType: "html"
+        });
+
+        var organizationRepoNameRegex = new RegExp("^\/" + organizationName + "\/.+");
+
+        repositoriesRequest.done(function (responseHtml) {
+            var repositoryRelativeUrls = [ ];
+            $(responseHtml).find('a').each(function () {
+                var repoName = $(this).attr("href");
+                if (repoName && repoName.match(organizationRepoNameRegex)) {
+                    repositoryRelativeUrls.push(repoName);
+                }
+            });
+            ALL_ORGANIZATION_REPOSITORIES = repositoryRelativeUrls;
+        });
+    }
+
+    loadOrganizationNameFromOptions();
 }
 
-var ALL_ORGANIZATION_REPOSITORIES = loadAllOrganizationRepositories();
+loadOrganization();
+
+
 // ------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------
 
@@ -91,9 +117,10 @@ function searchInAllRepositories(searchQuery) {
 
 
     function showSearchInProgressPopup() {
-        $.blockUI({ message: '<h1>Searching in all ' + ORGANIZATION_NAME + ' repositories...</h1>' +
+        $.blockUI({ message: '<h1>Searching in all "' + ORGANIZATION_NAME + '" repositories...</h1>' +
             '                     <p>In the meantime you can scroll down to the bottom of the page and see actual results.</p>' });
     }
+
     function finishSearchInProgressPopup() {
         $.unblockUI();
     }
@@ -131,14 +158,14 @@ function searchInAllRepositories(searchQuery) {
 
         var detailResultMessage;
         if (result.matchedReposCount) {
-            detailResultMessage =  result.matchedReposCount
+            detailResultMessage = result.matchedReposCount
                 + (result.matchedReposCount == 1 ? ' repository ' : ' repositories ')
                 + 'matched.';
         } else {
-            detailResultMessage =  'Sorry, no results were found.';
+            detailResultMessage = 'Sorry, no results were found.';
         }
         $('<div class="indent" id="' + SEARCH_RESULT_ELEMENT_ID_PREFIX + '"><h2>Search Finished</h2>' +
-                '<p>' + detailResultMessage + '</p></div>')
+            '<p>' + detailResultMessage + '</p></div>')
             .insertBefore($(SEARCH_PAGE_ANCHOR_ELEMENT_ID_SELECTOR));
 
     }
@@ -193,12 +220,12 @@ function searchInAllRepositories(searchQuery) {
 
                 numberOfSearchesFinished++;
                 if (numberOfSearchesFinished >= ALL_ORGANIZATION_REPOSITORIES.length) {
-                    allSearchesFinished( { 'matchedReposCount' : matchedReposCount } );
+                    allSearchesFinished({ 'matchedReposCount': matchedReposCount });
                 }
             });
         }
     } catch (error) {
-        allSearchesFinished( { 'errorMessage' : error.message } );
+        allSearchesFinished({ 'errorMessage': error.message });
     }
 }
 

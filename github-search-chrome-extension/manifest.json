@@ -1,15 +1,15 @@
 {
-    "name": "Github repositories code search extension",
+    "name": "Github repositories code search",
     "version": "1.0",
     "manifest_version": 2,
     "description": "The first extension that I made.",
+    "options_page": "options.html",
     "browser_action": {
         "default_title": "Github search",
-        "default_icon": "icon.png",
-        "default_popup": "popup.html"
+        "default_icon": "icon.png"
     },
     "background": {
-        "scripts": ["create_search_worker.js"]
+        "scripts": ["background.js", "create_search_worker.js"]
     },
     "content_scripts": [
         {
