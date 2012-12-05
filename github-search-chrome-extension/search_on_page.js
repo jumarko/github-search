@@ -1,24 +1,27 @@
-function loadAllGoodDataRepos() {
+var ORGANIZATION_NAME = "gooddata";
+
+function loadAllOrganizationRepositories() {
     var repositoriesRequest = $.ajax({
         type: "GET",
-        url: "https://github.com/organizations/gooddata/ajax_your_repos",
+        url: "https://github.com/organizations/" + ORGANIZATION_NAME + "/ajax_your_repos",
         dataType: "html"
     });
 
+    var organizationRepoNameRegex = new RegExp("^\/" + ORGANIZATION_NAME + "\/.+");
 
     repositoriesRequest.done(function (responseHtml) {
         var repositoryRelativeUrls = [ ];
         $(responseHtml).find('a').each(function () {
             var repoName = $(this).attr("href");
-            if (repoName && repoName.match(/^\/gooddata\/.+/)) {
+            if (repoName && repoName.match(organizationRepoNameRegex)) {
                 repositoryRelativeUrls.push(repoName);
             }
         });
-        ALL_GOODDATA_REPOSITORIES = repositoryRelativeUrls;
+        ALL_ORGANIZATION_REPOSITORIES = repositoryRelativeUrls;
     });
 }
 
-var ALL_GOODDATA_REPOSITORIES = loadAllGoodDataRepos();
+var ALL_ORGANIZATION_REPOSITORIES = loadAllOrganizationRepositories();
 // ------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------
 
@@ -88,7 +91,7 @@ function searchInAllRepositories(searchQuery) {
 
 
     function showSearchInProgressPopup() {
-        $.blockUI({ message: '<h1>Searching in all GoodData repositories...</h1>' +
+        $.blockUI({ message: '<h1>Searching in all ' + ORGANIZATION_NAME + ' repositories...</h1>' +
             '                     <p>In the meantime you can scroll down to the bottom of the page and see actual results.</p>' });
     }
     function finishSearchInProgressPopup() {
@@ -159,8 +162,8 @@ function searchInAllRepositories(searchQuery) {
 
         var numberOfSearchesFinished = 0;
         var matchedReposCount = 0;
-        for (var repo in ALL_GOODDATA_REPOSITORIES) {
-            var repository = ALL_GOODDATA_REPOSITORIES[repo];
+        for (var repo in ALL_ORGANIZATION_REPOSITORIES) {
+            var repository = ALL_ORGANIZATION_REPOSITORIES[repo];
             chrome.extension.sendRequest({
                 action: 'search_in_repo',
                 repositoryRelativeUrl: repository,
@@ -189,7 +192,7 @@ function searchInAllRepositories(searchQuery) {
                 }
 
                 numberOfSearchesFinished++;
-                if (numberOfSearchesFinished >= ALL_GOODDATA_REPOSITORIES.length) {
+                if (numberOfSearchesFinished >= ALL_ORGANIZATION_REPOSITORIES.length) {
                     allSearchesFinished( { 'matchedReposCount' : matchedReposCount } );
                 }
             });
