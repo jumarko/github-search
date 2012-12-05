@@ -38,10 +38,10 @@ function loadOrganization() {
                 ALL_ORGANIZATION_REPOSITORIES = repositoryRelativeUrls;
             },
             error: function(request, status, error) {
-                window.alert("Github search code extension error.\n\n" +
-                    "Cannot load organization repositories.\n" +
-                    "Check the organization name and that you have an access to that organization.\n\n" +
-                    "Detail: " + error);
+                window.alert('Github search code extension error.\n\n' +
+                    'Cannot load repositories for organization "' + organizationName +'".\n' +
+                    'Check the organization name and ensure you have an access to that organization.\n\n' +
+                    'Detail: ' + error);
                 ALL_ORGANIZATION_REPOSITORIES = [];
             }
         });

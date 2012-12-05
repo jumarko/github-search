@@ -1,6 +1,13 @@
 
 $(document).ready(function () {
+    var DEFAULT_ORGANIZATION_NAME = "gooddata";
     function loadOptions() {
+
+        // set default organization if no other is set
+        if ( ! localStorage['organization-name']) {
+            localStorage['organization-name'] = DEFAULT_ORGANIZATION_NAME;
+        }
+
         var organizationNameField = $("#organization-name");
         organizationNameField.attr('value', localStorage['organization-name']);
     }
