@@ -174,6 +174,7 @@ function searchInAllRepositories(searchQuery) {
 
 //                window.alert("search result envelope=" + searchResultEnvelope);
                     searchResultEnvelope.insertBefore($("#footer-push"));
+                    scrollDownToBottomOfPage();
 
                     matchedReposCount++;
                 }
