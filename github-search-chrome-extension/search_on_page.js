@@ -22,23 +22,28 @@ function loadOrganization() {
      * @see #loadOrganizationNameFromOptions - this function is called from it
      */
     function loadOrganizationRepositories(organizationName) {
+        var organizationRepoNameRegex = new RegExp("^\/" + organizationName + "\/.+");
         var repositoriesRequest = $.ajax({
             type: "GET",
             url: "https://github.com/organizations/" + organizationName + "/ajax_your_repos",
-            dataType: "html"
-        });
-
-        var organizationRepoNameRegex = new RegExp("^\/" + organizationName + "\/.+");
-
-        repositoriesRequest.done(function (responseHtml) {
-            var repositoryRelativeUrls = [ ];
-            $(responseHtml).find('a').each(function () {
-                var repoName = $(this).attr("href");
-                if (repoName && repoName.match(organizationRepoNameRegex)) {
-                    repositoryRelativeUrls.push(repoName);
-                }
-            });
-            ALL_ORGANIZATION_REPOSITORIES = repositoryRelativeUrls;
+            dataType: "html",
+            success: function (responseHtml) {
+                var repositoryRelativeUrls = [ ];
+                $(responseHtml).find('a').each(function () {
+                    var repoName = $(this).attr("href");
+                    if (repoName && repoName.match(organizationRepoNameRegex)) {
+                        repositoryRelativeUrls.push(repoName);
+                    }
+                });
+                ALL_ORGANIZATION_REPOSITORIES = repositoryRelativeUrls;
+            },
+            error: function(request, status, error) {
+                window.alert("Github search code extension error.\n\n" +
+                    "Cannot load organization repositories.\n" +
+                    "Check the organization name and that you have an access to that organization.\n\n" +
+                    "Detail: " + error);
+                ALL_ORGANIZATION_REPOSITORIES = [];
+            }
         });
     }
 
@@ -183,6 +188,12 @@ function searchInAllRepositories(searchQuery) {
 
 
     try {
+        if ( ! ALL_ORGANIZATION_REPOSITORIES
+            || ALL_ORGANIZATION_REPOSITORIES.length == 0) {
+            window.alert('No repositories for organization "' + ORGANIZATION_NAME + '" have been found.');
+            return;
+        }
+
         showSearchInProgressPopup();
         scrollDownToBottomOfPage();
         writeSeparator();
