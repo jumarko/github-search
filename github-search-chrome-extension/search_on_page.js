@@ -124,8 +124,8 @@ function searchInAllRepositories(searchQuery) {
         } else {
             detailResultMessage =  'Sorry, no results were found.';
         }
-        $('<div id="' + SEARCH_RESULT_ELEMENT_ID_PREFIX + '"><h2>Search Finished</h2>' +
-                '<p>&nbsp;&nbsp;' + detailResultMessage + '</p></div>')
+        $('<div class="indent" id="' + SEARCH_RESULT_ELEMENT_ID_PREFIX + '"><h2>Search Finished</h2>' +
+                '<p>' + detailResultMessage + '</p></div>')
             .insertBefore($("#footer-push"));
 
     }
@@ -139,11 +139,12 @@ function searchInAllRepositories(searchQuery) {
         scrollDownToBottomOfPage();
     }
 
-    showSearchInProgressPopup();
-    scrollDownToBottomOfPage();
+    removePreviousResults();
 
     try {
-        removePreviousResults();
+        showSearchInProgressPopup();
+        scrollDownToBottomOfPage();
+
         var numberOfSearchesFinished = 0;
         var matchedReposCount = 0;
         for (var repo in ALL_GOODDATA_REPOSITORIES) {
@@ -157,7 +158,7 @@ function searchInAllRepositories(searchQuery) {
 //            window.alert("search result body=" + searchResultBody);
                 if (searchResultBody) {
                     var searchResultsElementId = SEARCH_RESULT_ELEMENT_ID_PREFIX + changeToValidId(searchResult.repository);
-                    var searchResultEnvelope = $('<div id="' + searchResultsElementId + '">');
+                    var searchResultEnvelope = $('<div class="indent" id="' + searchResultsElementId + '">');
                     var searchResultTitle = $('<h2>Search result for query=<i>"' + searchQuery
                         + '</i>" in repository=<i>"' + searchResult.repository + '"</i></h2>');
                     $(searchResultEnvelope).append(searchResultTitle);
