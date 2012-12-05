@@ -13,7 +13,6 @@ function searchInRepository(repositoryRelativeUrl, query) {
         true);
     req.onload = function () {
         postMessage({ searchResultHtml : req.responseText });
-        self.close();
     }
 
     req.send(null);

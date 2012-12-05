@@ -1,7 +1,3 @@
-// Copyright (c) 2012 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
 function loadAllGoodDataRepos() {
     var repositoriesRequest = $.ajax({
         type: "GET",
@@ -129,7 +125,7 @@ function searchInAllRepositories(searchQuery) {
             detailResultMessage =  'Sorry, no results were found.';
         }
         $('<div id="' + SEARCH_RESULT_ELEMENT_ID_PREFIX + '"><h2>Search Finished</h2>' +
-                '<p>' + detailResultMessage + '</p></div>')
+                '<p>&nbsp;&nbsp;' + detailResultMessage + '</p></div>')
             .insertBefore($("#footer-push"));
 
     }
