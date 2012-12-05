@@ -201,8 +201,8 @@ function searchInAllRepositories(searchQuery) {
                 if (searchResultBody) {
                     var searchResultsElementId = SEARCH_RESULT_ELEMENT_ID_PREFIX + changeToValidId(searchResult.repository);
                     var searchResultEnvelope = $('<div class="indent" id="' + searchResultsElementId + '">');
-                    var searchResultTitle = $('<h2>Search result for query=<i>"' + searchQuery
-                        + '</i>" in repository=<i>"' + searchResult.repository + '"</i></h2>');
+                    var searchResultTitle = $('<h2>Search result for query "' + searchQuery + '" ' +
+                        'in repository <a href="https://github.com' + searchResult.repository + '">' + searchResult.repository + '</a></h2>');
                     $(searchResultEnvelope).append(searchResultTitle);
                     $(searchResultEnvelope).append(searchResultBody);
 
