@@ -82,6 +82,11 @@ $(document).ready(function () {
 function searchInAllRepositories(searchQuery) {
 
     var SEARCH_RESULT_ELEMENT_ID_PREFIX = "searchResultsFor_";
+    /** Id of element which is used as an anchor in existing github html page - all search results will be inserted
+     * BEFORE THIS ELEMENT.*/
+    var SEARCH_PAGE_ANCHOR_ELEMENT_ID_SELECTOR = "#footer-push";
+
+
     function showSearchInProgressPopup() {
         $.blockUI({ message: '<h1>Searching in all GoodData repositories...</h1>' +
             '                     <p>In the meantime you can scroll down to the bottom of the page and see actual results.</p>' });
@@ -94,6 +99,11 @@ function searchInAllRepositories(searchQuery) {
     function scrollDownToBottomOfPage() {
         $(document).scrollTop($(document).height());
     }
+
+    function writeSeparator() {
+        $('<div> <br/> <hr/> <br/> </div>').insertBefore($(SEARCH_PAGE_ANCHOR_ELEMENT_ID_SELECTOR));
+    }
+
     /**
      * Turns candidate id string to valid id element replacing all slashes "/" with underscores "_".
      * @param string representing Id with potentially unsafe characters "/"
@@ -126,7 +136,7 @@ function searchInAllRepositories(searchQuery) {
         }
         $('<div class="indent" id="' + SEARCH_RESULT_ELEMENT_ID_PREFIX + '"><h2>Search Finished</h2>' +
                 '<p>' + detailResultMessage + '</p></div>')
-            .insertBefore($("#footer-push"));
+            .insertBefore($(SEARCH_PAGE_ANCHOR_ELEMENT_ID_SELECTOR));
 
     }
 
@@ -141,9 +151,11 @@ function searchInAllRepositories(searchQuery) {
 
     removePreviousResults();
 
+
     try {
         showSearchInProgressPopup();
         scrollDownToBottomOfPage();
+        writeSeparator();
 
         var numberOfSearchesFinished = 0;
         var matchedReposCount = 0;
@@ -170,7 +182,7 @@ function searchInAllRepositories(searchQuery) {
                     searchResultEnvelope.append($("<br />"));
 
 //                window.alert("search result envelope=" + searchResultEnvelope);
-                    searchResultEnvelope.insertBefore($("#footer-push"));
+                    searchResultEnvelope.insertBefore($(SEARCH_PAGE_ANCHOR_ELEMENT_ID_SELECTOR));
                     scrollDownToBottomOfPage();
 
                     matchedReposCount++;
