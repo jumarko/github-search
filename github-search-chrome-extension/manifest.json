@@ -1,27 +1,27 @@
 {
-  "name": "Github repositories code search extension",
-  "version": "1.0",
-  "manifest_version": 2,
-  "description": "The first extension that I made.",
-  "browser_action": {
-    "default_title": "Github search",
-    "default_icon": "icon.png",
-    "default_popup": "popup.html"
-  },
-  "background": {
+    "name": "Github repositories code search extension",
+    "version": "1.0",
+    "manifest_version": 2,
+    "description": "The first extension that I made.",
+    "browser_action": {
+        "default_title": "Github search",
+        "default_icon": "icon.png",
+        "default_popup": "popup.html"
+    },
+    "background": {
         "scripts": ["create_search_worker.js"]
-  },
-  "content_scripts": [
-    {
-      "matches": ["https://github.com/*"],
-      "js": ["jquery-1.8.3.min.js", "search_on_page.js"]
-    }
-  ],
-  "permissions": [
-    "http://www.google.com/",
-    "https://www.google.com/",
-    "http://www.google.sk/",
-    "https://www.google.sk/",
-    "https://github.com/"
-  ]
+    },
+    "content_scripts": [
+        {
+            "matches": ["https://github.com/*"],
+            "js": ["jquery-1.8.3.min.js", "jquery.blockUI.js", "search_on_page.js"]
+        }
+    ],
+    "permissions": [
+        "http://www.google.com/",
+        "https://www.google.com/",
+        "http://www.google.sk/",
+        "https://www.google.sk/",
+        "https://github.com/"
+    ]
 }
