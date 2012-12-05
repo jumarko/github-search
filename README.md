@@ -16,3 +16,27 @@ All files related to this extension are placed in directory 'github-search-chrom
 3. Go to the Extensions page (Chrome menu on toolbar -> Tools -> Extensions).
 4. Drag and Drop file github-search-chrome-extension.crx to the Extensions page.
 5. Setup proper organization name (default is 'gooddata') in 'Github repositories code search' extension options. You can access options page either via Extensions page ('Github repositories code search' extension -> Options) or via an extension icon (right click GitHub "cat" icon in the toolbar -> "Options" from popup menu). 
+
+
+
+## Usage
+You can use 3  (standard) GitHub search boxes for perform searches across all repositories.
+Unfortunately, the top level basic search box (the one that is at the very top when you hit https://github.com) is not supported.
+
+YOU HAVE TO PREFIX YOUR SEARCH QUERY WITH "all:" to perform searches across all repositories. Otheriwse only standard github search is performed.
+
+Example query (will search string 'HttpClient' in all organization's repositories):
+    
+    all:HttpClient
+
+### Advanced search box
+You can go to the advanced search box either by clicking the basic top level search box or directly via https://github.com/search/advanced.
+
+### Repository 'basic' search box (only in private repos)
+'Basic' search box is standard github widget which is able to search in one (private) repository. This is the one that is available at repository page.
+
+### Repository 'advanced' search box
+'Advanced' search box is the one where you are redirected after performing search via 'basic' search box.
+
+### Video
+There is a short [introductory video](https://github.com/downloads/jumarko/github-search/github-search-code-repositories-in-action.mov) in Downloads section.
