@@ -24,13 +24,20 @@ function onRequest(request, sender, response) {
 
 
 function searchInRepo(request, sendSearchResultResponse) {
-    var searchWorker = createWorker(sendSearchResultResponse, request.repositoryRelativeUrl);
-    var searchData = {
-        'repositoryRelativeUrl': request.repositoryRelativeUrl,
-        'query': request.query
-    };
-//        window.alert("Posting message to worker in background script data" + searchData);
-    searchWorker.postMessage(searchData);
+
+    var searchRequest = new XMLHttpRequest();
+    searchRequest.open(
+        "GET",
+        "https://github.com" + request.repositoryRelativeUrl + "/search?q=" + request.query,
+        true);
+    searchRequest.onload = function () {
+        sendSearchResultResponse({
+            repository : request.repositoryRelativeUrl,
+            html : searchRequest.responseText });
+
+    }
+
+    searchRequest.send(null);
 }
 
 
