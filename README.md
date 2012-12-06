@@ -9,9 +9,14 @@ Right now, only Google Chrome browser is supported.
 ## Google Chrome Extension 
 
 All source files related to this extension are placed in directory 'github-search-chrome-extension'.
-Packaged extension is available via [Downloads](https://github.com/jumarko/github-search/downloads) page.
+Packaged extension is available directly from [Chrome Web Store](https://chrome.google.com/webstore/detail/github-repositories-code/kekdlaiopeadgpbjbcedfiladbfehplk) 
+or [Downloads](https://github.com/jumarko/github-search/downloads) page.
 
 ### Installation
+The most straightforward option is to install extension directly from [Chrome Web Store](https://chrome.google.com/webstore/detail/github-repositories-code/kekdlaiopeadgpbjbcedfiladbfehplk).
+
+Alternatively, you can follow these steps to install extension manually:
+
 1. Download file [github-search-chrome-extension.crx] (https://github.com/downloads/jumarko/github-search/github-search-chrome-extension-0.1.crx).
 2. Open Chrome web browser.
 3. Go to the Extensions page (Chrome menu on toolbar -> Tools -> Extensions).
