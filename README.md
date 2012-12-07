@@ -17,7 +17,7 @@ The most straightforward option is to install extension directly from [Chrome We
 
 Alternatively, you can follow these steps to install extension manually:
 
-1. Download file [github-search-chrome-extension.crx] (https://github.com/downloads/jumarko/github-search/github-search-chrome-extension-0.1.crx).
+1. Download file [github-search-chrome-extension.crx] (https://github.com/downloads/jumarko/github-search/github-search-chrome-extension-0.2.crx).
 2. Open Chrome web browser.
 3. Go to the Extensions page (Chrome menu on toolbar -> Tools -> Extensions).
 4. Drag and Drop file github-search-chrome-extension.crx to the Extensions page.
