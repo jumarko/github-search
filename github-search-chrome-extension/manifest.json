@@ -1,6 +1,6 @@
 {
     "name": "Github repositories code search",
-    "version": "0.2",
+    "version": "0.3",
     "homepage_url": "https://github.com/jumarko/github-search",
     "manifest_version": 2,
     "description": "Extension allows full text search across all GitHub organization's repositories.",
