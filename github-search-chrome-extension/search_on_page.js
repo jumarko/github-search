@@ -66,37 +66,52 @@ var githubOrganization = {
 }
 
 
-// ------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------
-
-
-// ------------------------- JQUERY --------------------------
-
-function getRepoAdvancedSearchBoxValue() {
-    return $('input[placeholder="Search..."]').val();
-}
-function getRepoBasicSearchBoxValue() {
-    return $('input[placeholder*="Search source code"]').val();
-}
-function getTopLevelBasicSearchBoxValue() {
-    if ($('input[name="q"]') && $('input[name="q"]').length > 0) {
-        return $('input[name="q"]')[0].value;
-    }
-    // TODO: following does not work
-//    return $('input[placeholder="Search source code"]').val();
-}
-
-function getTopLevelAdvancedSearchBoxValue() {
-    if ($('input[name="q"]') && $('input[name="q"]').length > 1) {
-        return $('input[name="q"]')[1].value;
-    }
-
-    // following does not work
-//    return $('input[placeholder="Search or type a command"]').val();
-}
-
-
 $(document).ready(function () {
+
+    function getRepoAdvancedSearchBoxValue() {
+        return $('input[placeholder="Search..."]').val();
+    }
+    function getRepoBasicSearchBoxValue() {
+        return $('input[placeholder*="Search source code"]').val();
+    }
+    function getTopLevelBasicSearchBoxValue() {
+        if ($('input[name="q"]') && $('input[name="q"]').length > 0) {
+            return $('input[name="q"]')[0].value;
+        }
+        // TODO: following does not work
+//    return $('input[placeholder="Search source code"]').val();
+    }
+
+    function getTopLevelAdvancedSearchBoxValue() {
+        if ($('input[name="q"]') && $('input[name="q"]').length > 1) {
+            return $('input[name="q"]')[1].value;
+        }
+
+        // following does not work
+//    return $('input[placeholder="Search or type a command"]').val();
+    }
+
+
+    /**
+     * Checks given query and if it starts with prefix "all:" then perform search in all repositories
+     * @param query potential query for all repositories
+     * @return {boolean} if query is for searching in all repositories, false otherwise
+     */
+    function checkQueryAndSearchInAllRepos(query) {
+        if (query && query.match(/all:.+/)) {
+            var allReposSearchQuery = query.substring(4);
+            // do not allow searches for single characters - the potantial result is very large and this does not much sense
+            if (allReposSearchQuery.length < 2) {
+                window.alert("Enter at least TWO characters for searching.");
+            } else {
+                //            window.alert("Search in all repos query=" + allReposSearchQuery );
+                searchInAllRepositories(allReposSearchQuery);
+            }
+            return true;
+        }
+
+        return false;
+    }
 
     $("form").submit(function () {
         // user must prefixed query with "all:" to do global search across all repos
@@ -115,23 +130,43 @@ $(document).ready(function () {
 
         searchQueryString = $.trim(searchQueryString);
 //        window.alert("Search with jquery querystring=" + searchQueryString);
-        if (searchQueryString.match(/all:.+/)) {
-            var allReposSearchQuery = searchQueryString.substring(4);
-            // do not allow searches for single characters - the potantial result is very large and this does not much sense
-            if (allReposSearchQuery.length < 2) {
-                window.alert("Enter at least TWO characters for searching.");
-            } else {
-                //            window.alert("Search in all repos query=" + allReposSearchQuery );
-                searchInAllRepositories(allReposSearchQuery);
-            }
+        if (checkQueryAndSearchInAllRepos(searchQueryString)) {
+            // we are searching in all repos, inactivate default GitHub search
             return false;
         }
 
-        // pass logic to normal repo search
+        // pass logic to normal GitHub repo search
         return true;
     });
+
+
+    var queryUrlParameterReqex = /[\?&]q=([^&]+)/;
+    /**
+     * Checks whether current page location contains proper pathname ("search")
+     * and url (GET) parameter for query ("q")
+     */
+    function queryUrlParameterSet() {
+        function urlPathEndsWithSearch() {
+            return location.pathname && location.pathname.match(/.*\/search/);
+        }
+
+        function firstUrlParameterIsQuery() {
+            return location.search && location.search.match(queryUrlParameterReqex);
+        }
+
+        return urlPathEndsWithSearch() && firstUrlParameterIsQuery();
+    }
+
+    if (queryUrlParameterSet())  {
+        var searchQueryParam = location.search.match(queryUrlParameterReqex);
+        if (searchQueryParam) {
+            // we have to decode value because it can contains special chars (typically collon in prefix "all:")
+            var searchQueryParamValue = decodeURIComponent(searchQueryParam[1]);
+            checkQueryAndSearchInAllRepos(searchQueryParamValue);
+        }
+
+    }
 });
-// ------------------------- End Of JQUERY --------------------------
 
 
 function searchInAllRepositories(searchQuery) {
