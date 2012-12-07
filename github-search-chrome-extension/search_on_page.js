@@ -1,56 +1,69 @@
-var ORGANIZATION_NAME;
-var ALL_ORGANIZATION_REPOSITORIES;
+var githubOrganization = {
+    name: "",
+    repositories: [],
 
-function loadOrganization() {
+    /** true or false if both name and repositories are filled */
+    organizationDataLoaded: function() {
+        return githubOrganization.name && githubOrganization.repositories && githubOrganization.repositories.length > 0;
+    },
+
     /**
-     * Load name of github organization from saved options - user can changed this value, default is 'gooddata'.
-     * @see background.js
+     * Load organization data - name and repositories.
+     *
+     * @param callback optional callback to be called if data has been loaded successfully
      */
-    function loadOrganizationNameFromOptions() {
+    loadOrganizationData: function (callback) {
         chrome.extension.sendRequest({
-            action: 'get_organization_name'
+            action: 'load_organization_data'
         }, function (result) {
-            ORGANIZATION_NAME = result.organizationName;
-            // load repositories can be called only after we have organization name
-            loadOrganizationRepositories(ORGANIZATION_NAME);
-        });
-    }
-
-    /**
-     * Loads all organization's repositories which are accessible by current user logged in GitHub.
-     * @param organizationName name of GitHub organization
-     * @see #loadOrganizationNameFromOptions - this function is called from it
-     */
-    function loadOrganizationRepositories(organizationName) {
-        var organizationRepoNameRegex = new RegExp("^\/" + organizationName + "\/.+");
-        var repositoriesRequest = $.ajax({
-            type: "GET",
-            url: "https://github.com/organizations/" + organizationName + "/ajax_your_repos",
-            dataType: "html",
-            success: function (responseHtml) {
-                var repositoryRelativeUrls = [ ];
-                $(responseHtml).find('a').each(function () {
-                    var repoName = $(this).attr("href");
-                    if (repoName && repoName.match(organizationRepoNameRegex)) {
-                        repositoryRelativeUrls.push(repoName);
-                    }
-                });
-                ALL_ORGANIZATION_REPOSITORIES = repositoryRelativeUrls;
-            },
-            error: function(request, status, error) {
-                window.alert('Github search code extension error.\n\n' +
-                    'Cannot load repositories for organization "' + organizationName +'".\n' +
-                    'Check the organization name and ensure you have an access to that organization.\n\n' +
-                    'Detail: ' + error);
-                ALL_ORGANIZATION_REPOSITORIES = [];
+            if (result.error && result.error.message) {
+                $.unblockUI();
+                window.alert(result.error.message);
+            } else {
+                githubOrganization.name = result.organizationName;
+                loadOrganizationRepositories(githubOrganization.name);
             }
         });
+
+        /**
+         * TODO: this could be located in background.js - However, I was not able to make this work:
+         *      ajax http call at "https://github.com/organizations/" + organizationName + "/ajax_your_repos"
+         *      kept returning "Not Acceptable" when running from background.js.
+         *
+         * Loads all organization's repositories which are accessible by current user logged in GitHub.
+         *
+         * @param organizationName name of GitHub organization
+         * @see loadOrganizationNameFromOptions - this function is called from it
+         */
+        function loadOrganizationRepositories(organizationName) {
+
+            var organizationRepoNameRegex = new RegExp("^\/" + organizationName + "\/.+");
+            $.ajax({
+                type: "GET",
+                url: "https://github.com/organizations/" + organizationName + "/ajax_your_repos",
+                dataType: "html",
+                success: function (responseHtml) {
+                    var repositoryRelativeUrls = [ ];
+                    $(responseHtml).find('a').each(function () {
+                        var repoName = $(this).attr("href");
+                        if (repoName && repoName.match(organizationRepoNameRegex)) {
+                            repositoryRelativeUrls.push(repoName);
+                        }
+                    });
+                    githubOrganization.repositories = repositoryRelativeUrls;
+                    callback(organizationName, githubOrganization.repositories);
+                },
+                error: function (request, status, error) {
+                    $.unblockUI();
+                    window.alert('Github search code extension error.\n\n' +
+                        'Cannot load repositories for organization "' + organizationName + '".\n' +
+                        'Check the organization name and ensure you have an access to that organization.\n\n' +
+                        'Error message: ' + error);
+                }
+            });
+        }
     }
-
-    loadOrganizationNameFromOptions();
 }
-
-loadOrganization();
 
 
 // ------------------------------------------------------------------------------------
@@ -78,16 +91,17 @@ function getTopLevelAdvancedSearchBoxValue() {
         return $('input[name="q"]')[1].value;
     }
 
-    // TODO: following does not work
+    // following does not work
 //    return $('input[placeholder="Search or type a command"]').val();
 }
 
 
 $(document).ready(function () {
+
     $("form").submit(function () {
         // user must prefixed query with "all:" to do global search across all repos
 
-        var searchQueryString;
+        var searchQueryString = '';
         if (getRepoAdvancedSearchBoxValue()) {
             searchQueryString = getRepoAdvancedSearchBoxValue();
         } else if (getRepoBasicSearchBoxValue()) {
@@ -98,11 +112,18 @@ $(document).ready(function () {
         } else if (getTopLevelBasicSearchBoxValue()) {
             searchQueryString = getTopLevelBasicSearchBoxValue();
         }
+
+        searchQueryString = $.trim(searchQueryString);
 //        window.alert("Search with jquery querystring=" + searchQueryString);
-        if (searchQueryString && searchQueryString.match(/all:.+/)) {
+        if (searchQueryString.match(/all:.+/)) {
             var allReposSearchQuery = searchQueryString.substring(4);
-//            window.alert("Search in all repos query=" + allReposSearchQuery );
-            searchInAllRepositories(allReposSearchQuery);
+            // do not allow searches for single characters - the potantial result is very large and this does not much sense
+            if (allReposSearchQuery.length < 2) {
+                window.alert("Enter at least TWO characters for searching.");
+            } else {
+                //            window.alert("Search in all repos query=" + allReposSearchQuery );
+                searchInAllRepositories(allReposSearchQuery);
+            }
             return false;
         }
 
@@ -122,7 +143,7 @@ function searchInAllRepositories(searchQuery) {
 
 
     function showSearchInProgressPopup() {
-        $.blockUI({ message: '<h1>Searching in all "' + ORGANIZATION_NAME + '" repositories...</h1>' +
+        $.blockUI({ message: '<h1>Searching in all "' + githubOrganization.name + '" repositories...</h1>' +
             '                     <p>In the meantime you can scroll down to the bottom of the page and see actual results.</p>' });
     }
 
@@ -184,60 +205,78 @@ function searchInAllRepositories(searchQuery) {
         scrollDownToBottomOfPage();
     }
 
-    removePreviousResults();
 
+    /**
+     * Performs actual search in all organization repositories.
+     */
+    function performSearch() {
+        $.unblockUI();
 
-    try {
-        if ( ! ALL_ORGANIZATION_REPOSITORIES
-            || ALL_ORGANIZATION_REPOSITORIES.length == 0) {
-            window.alert('No repositories for organization "' + ORGANIZATION_NAME + '" have been found.');
+        if ( ! githubOrganization.organizationDataLoaded()) {
+            window.alert('No repositories for organization "' + githubOrganization.name + '" have been found.');
             return;
         }
 
-        showSearchInProgressPopup();
-        scrollDownToBottomOfPage();
-        writeSeparator();
+        try {
+            removePreviousResults();
+            showSearchInProgressPopup();
+            scrollDownToBottomOfPage();
+            writeSeparator();
 
-        var numberOfSearchesFinished = 0;
-        var matchedReposCount = 0;
-        for (var repo in ALL_ORGANIZATION_REPOSITORIES) {
-            var repository = ALL_ORGANIZATION_REPOSITORIES[repo];
-            chrome.extension.sendRequest({
-                action: 'search_in_repo',
-                repositoryRelativeUrl: repository,
-                query: searchQuery
-            }, function (searchResult) {
-                var searchResultBody = getSearchResultElement(searchResult.html, "files");
+            var numberOfSearchesFinished = 0;
+            var matchedReposCount = 0;
+            for (var repo in githubOrganization.repositories) {
+                var repository = githubOrganization.repositories[repo];
+                chrome.extension.sendRequest({
+                    action: 'search_in_repo',
+                    repositoryRelativeUrl: repository,
+                    query: searchQuery
+                }, function (searchResult) {
+                    var searchResultBody = getSearchResultElement(searchResult.html, "files");
 //            window.alert("search result body=" + searchResultBody);
-                if (searchResultBody) {
-                    var searchResultsElementId = SEARCH_RESULT_ELEMENT_ID_PREFIX + changeToValidId(searchResult.repository);
-                    var searchResultEnvelope = $('<div class="indent" id="' + searchResultsElementId + '">');
-                    var searchResultTitle = $('<h2>Search result for query "' + searchQuery + '" ' +
-                        'in repository <a href="https://github.com' + searchResult.repository + '">' + searchResult.repository + '</a></h2>');
-                    $(searchResultEnvelope).append(searchResultTitle);
-                    $(searchResultEnvelope).append(searchResultBody);
+                    if (searchResultBody) {
+                        var searchResultsElementId = SEARCH_RESULT_ELEMENT_ID_PREFIX + changeToValidId(searchResult.repository);
+                        var searchResultEnvelope = $('<div class="indent" id="' + searchResultsElementId + '">');
+                        var searchResultTitle = $('<h2>Search result for query "' + searchQuery + '" ' +
+                            'in repository <a href="https://github.com' + searchResult.repository + '">' + searchResult.repository + '</a></h2>');
+                        $(searchResultEnvelope).append(searchResultTitle);
+                        $(searchResultEnvelope).append(searchResultBody);
 
-                    // separate more cleanly from other repository search results via more empty new lines
-                    searchResultEnvelope.append($("<br />"));
-                    searchResultEnvelope.append($("<br />"));
-                    searchResultEnvelope.append($("<br />"));
+                        // separate more cleanly from other repository search results via more empty new lines
+                        searchResultEnvelope.append($("<br />"));
+                        searchResultEnvelope.append($("<br />"));
+                        searchResultEnvelope.append($("<br />"));
 
 //                window.alert("search result envelope=" + searchResultEnvelope);
-                    searchResultEnvelope.insertBefore($(SEARCH_PAGE_ANCHOR_ELEMENT_ID_SELECTOR));
-                    scrollDownToBottomOfPage();
+                        searchResultEnvelope.insertBefore($(SEARCH_PAGE_ANCHOR_ELEMENT_ID_SELECTOR));
+                        scrollDownToBottomOfPage();
 
-                    matchedReposCount++;
-                }
+                        matchedReposCount++;
+                    }
 
-                numberOfSearchesFinished++;
-                if (numberOfSearchesFinished >= ALL_ORGANIZATION_REPOSITORIES.length) {
-                    allSearchesFinished({ 'matchedReposCount': matchedReposCount });
-                }
-            });
+                    numberOfSearchesFinished++;
+                    if (numberOfSearchesFinished >= githubOrganization.repositories.length) {
+                        allSearchesFinished({ 'matchedReposCount': matchedReposCount });
+                    }
+                });
+            }
+        } catch (error) {
+            allSearchesFinished({ 'errorMessage': error.message });
         }
-    } catch (error) {
-        allSearchesFinished({ 'errorMessage': error.message });
     }
+
+
+    if ( ! githubOrganization.organizationDataLoaded()) {
+        try {
+            $.blockUI({ message: '<h2>Loading data for github organization...</h2>' });
+            githubOrganization.loadOrganizationData(performSearch);
+        } catch (e) {
+            $.unblockUI();
+        }
+        return;
+    }
+
+    performSearch();
 }
 
 
