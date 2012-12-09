@@ -18,7 +18,9 @@ var githubOrganization = {
         }, function (result) {
             if (result.error && result.error.message) {
                 $.unblockUI();
-                window.alert(result.error.message);
+                jAlert('error',
+                    result.error.message,
+                    'Error while loading organization data');
             } else {
                 githubOrganization.name = result.organizationName;
                 loadOrganizationRepositories(githubOrganization.name);
@@ -55,10 +57,11 @@ var githubOrganization = {
                 },
                 error: function (request, status, error) {
                     $.unblockUI();
-                    window.alert('Github search code extension error.\n\n' +
+                    jAlert('error',
                         'Cannot load repositories for organization "' + organizationName + '".\n' +
-                        'Check the organization name and ensure you have an access to that organization.\n\n' +
-                        'Error message: ' + error);
+                            'Check the organization name and ensure you have an access to that organization.\n\n' +
+                            'Error message: ' + error,
+                        'Github search code extension error.');
                 }
             });
         }
@@ -81,9 +84,10 @@ $(document).ready(function () {
             var allReposSearchQuery = query.substring(4);
             // do not allow searches for single characters - the potantial result is very large and this does not much sense
             if (allReposSearchQuery.length < 2) {
-                window.alert("Enter at least TWO characters for searching.");
+                jAlert('error',
+                    'Enter at least TWO characters for searching.',
+                    'Malformed search query');
             } else {
-                //            window.alert("Search in all repos query=" + allReposSearchQuery );
                 searchInAllRepositories(allReposSearchQuery);
             }
             return true;
@@ -167,8 +171,9 @@ function searchInAllRepositories(searchQuery) {
 
     function displaySearchResultsSummary(result) {
         if (result.errorMessage) {
-            window.alert("There was some error while searching. Results might be incomplete!\nError message: "
-                + result.errorMessage);
+            jAlert('error',
+                'There was some error while searching. Results might be incomplete!\nError message: \n    ' + result.errorMessage,
+                'Search error');
         }
 
         var detailResultMessage;
@@ -202,7 +207,9 @@ function searchInAllRepositories(searchQuery) {
         $.unblockUI();
 
         if ( ! githubOrganization.organizationDataLoaded()) {
-            window.alert('No repositories for organization "' + githubOrganization.name + '" have been found.');
+            jAlert('error',
+                'No repository for organization "' + githubOrganization.name + '" has been found.',
+                'No repository found');
             return;
         }
 
@@ -227,10 +234,9 @@ function searchInAllRepositories(searchQuery) {
                     query: searchQuery
                 }, function (searchResult) {
                     if (searchResult.error) {
-                        searchResultError += ":" + searchResult.error;
+                        searchResultError += "\n" + searchResult.error;
                     } else {
                         var searchResultBody = getSearchResultElement(searchResult.html, "files");
-//                        window.alert("search result body=" + searchResultBody);
                         if (searchResultBody) {
                             var searchResultsElementId = SEARCH_RESULT_ELEMENT_ID_PREFIX + changeToValidId(searchResult.repository);
                             var searchResultEnvelope = $('<div class="indent" id="' + searchResultsElementId + '">');
@@ -244,7 +250,6 @@ function searchInAllRepositories(searchQuery) {
                             searchResultEnvelope.append($("<br />"));
                             searchResultEnvelope.append($("<br />"));
 
-//                            window.alert("search result envelope=" + searchResultEnvelope);
                             searchResultEnvelope.insertBefore($(SEARCH_PAGE_ANCHOR_ELEMENT_ID_SELECTOR));
                             scrollDownToBottomOfPage();
 
@@ -280,7 +285,6 @@ function searchInAllRepositories(searchQuery) {
 
 function getSearchResultElement(htmlText, elementId) {
     var htmlDocument = $(htmlText);
-//    window.alert("Search result html document=" + htmlDocument);
     var searchResults = htmlDocument.find("#" + elementId);
     return (searchResults.length == 1) ? searchResults : null;
 }

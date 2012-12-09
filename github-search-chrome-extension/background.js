@@ -47,7 +47,7 @@ function onRequest(request, sender, response) {
             },
             error: function (ajaxRequest, status, error) {
                 response( { error : "Error while searching in repository=" + request.repositoryRelativeUrl +
-                                    "\n    Error message:" + error} );
+                                    (error ? " -- " + error : "") }  );
             }
         });
     }
