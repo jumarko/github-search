@@ -68,6 +68,9 @@ var githubOrganization = {
 
 $(document).ready(function () {
 
+    // setup sensible timeout to avoid infinite waiting for data
+    $.ajaxSetup( {timeout : 60000});
+
     /**
      * Checks given query and if it starts with prefix "all:" then perform search in all repositories
      * @param query potential query for all repositories
@@ -211,38 +214,47 @@ function searchInAllRepositories(searchQuery) {
 
             var numberOfSearchesFinished = 0;
             var matchedReposCount = 0;
+            var searchResultError = '';
             for (var repo in githubOrganization.repositories) {
+                if (searchResultError) {
+                    // do not continue in searching if there has already been some error!
+                    break;
+                }
                 var repository = githubOrganization.repositories[repo];
                 chrome.extension.sendRequest({
                     action: 'search_in_repo',
                     repositoryRelativeUrl: repository,
                     query: searchQuery
                 }, function (searchResult) {
-                    var searchResultBody = getSearchResultElement(searchResult.html, "files");
-//            window.alert("search result body=" + searchResultBody);
-                    if (searchResultBody) {
-                        var searchResultsElementId = SEARCH_RESULT_ELEMENT_ID_PREFIX + changeToValidId(searchResult.repository);
-                        var searchResultEnvelope = $('<div class="indent" id="' + searchResultsElementId + '">');
-                        var searchResultTitle = $('<h2>Search result for query "' + searchQuery + '" ' +
-                            'in repository <a href="https://github.com' + searchResult.repository + '">' + searchResult.repository + '</a></h2>');
-                        $(searchResultEnvelope).append(searchResultTitle);
-                        $(searchResultEnvelope).append(searchResultBody);
+                    if (searchResult.error) {
+                        searchResultError += ":" + searchResult.error;
+                    } else {
+                        var searchResultBody = getSearchResultElement(searchResult.html, "files");
+//                        window.alert("search result body=" + searchResultBody);
+                        if (searchResultBody) {
+                            var searchResultsElementId = SEARCH_RESULT_ELEMENT_ID_PREFIX + changeToValidId(searchResult.repository);
+                            var searchResultEnvelope = $('<div class="indent" id="' + searchResultsElementId + '">');
+                            var searchResultTitle = $('<h2>Search result for query "' + searchQuery + '" ' +
+                                'in repository <a href="https://github.com' + searchResult.repository + '">' + searchResult.repository + '</a></h2>');
+                            $(searchResultEnvelope).append(searchResultTitle);
+                            $(searchResultEnvelope).append(searchResultBody);
 
-                        // separate more cleanly from other repository search results via more empty new lines
-                        searchResultEnvelope.append($("<br />"));
-                        searchResultEnvelope.append($("<br />"));
-                        searchResultEnvelope.append($("<br />"));
+                            // separate more cleanly from other repository search results via more empty new lines
+                            searchResultEnvelope.append($("<br />"));
+                            searchResultEnvelope.append($("<br />"));
+                            searchResultEnvelope.append($("<br />"));
 
-//                window.alert("search result envelope=" + searchResultEnvelope);
-                        searchResultEnvelope.insertBefore($(SEARCH_PAGE_ANCHOR_ELEMENT_ID_SELECTOR));
-                        scrollDownToBottomOfPage();
+//                            window.alert("search result envelope=" + searchResultEnvelope);
+                            searchResultEnvelope.insertBefore($(SEARCH_PAGE_ANCHOR_ELEMENT_ID_SELECTOR));
+                            scrollDownToBottomOfPage();
 
-                        matchedReposCount++;
+                            matchedReposCount++;
+                        }
                     }
 
                     numberOfSearchesFinished++;
                     if (numberOfSearchesFinished >= githubOrganization.repositories.length) {
-                        allSearchesFinished({ 'matchedReposCount': matchedReposCount });
+                        allSearchesFinished({ 'matchedReposCount': matchedReposCount , 'errorMessage' : searchResultError });
                     }
                 });
             }

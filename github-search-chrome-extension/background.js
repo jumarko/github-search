@@ -3,6 +3,9 @@
  */
 chrome.extension.onRequest.addListener(onRequest);
 
+// setup sensible timeout to avoid infinite waiting for data
+$.ajaxSetup( {timeout : 60000});
+
 
 /*
  * Handles data sent via chrome.extension.sendRequest().
@@ -33,19 +36,20 @@ function onRequest(request, sender, response) {
      */
     function searchInRepo(request, response) {
 
-        var searchRequest = new XMLHttpRequest();
-        searchRequest.open(
-            "GET",
-            "https://github.com" + request.repositoryRelativeUrl + "/search?q=" + request.query,
-            true);
-        searchRequest.onload = function () {
-            response({
-                repository: request.repositoryRelativeUrl,
-                html: searchRequest.responseText });
-
-        }
-
-        searchRequest.send(null);
+        $.ajax({
+            type: "GET",
+            url: "https://github.com" + request.repositoryRelativeUrl + "/search?q=" + request.query,
+            dataType: "html",
+            success: function (responseHtml) {
+                response({
+                    repository: request.repositoryRelativeUrl,
+                    html: responseHtml });
+            },
+            error: function (ajaxRequest, status, error) {
+                response( { error : "Error while searching in repository=" + request.repositoryRelativeUrl +
+                                    "\n    Error message:" + error} );
+            }
+        });
     }
 
 
