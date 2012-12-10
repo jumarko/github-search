@@ -17,7 +17,7 @@ The most straightforward option is to install extension directly from [Chrome We
 
 Alternatively, you can follow these steps to install extension manually:
 
-1. Download file [github-search-chrome-extension.crx] (https://github.com/downloads/jumarko/github-search/github-search-chrome-extension-0.2.crx).
+1. Download .crx file [github-search-chrome-extension] (https://github.com/downloads/jumarko/github-search/github-search-chrome-extension-0.4.crx).
 2. Open Chrome web browser.
 3. Go to the Extensions page (Chrome menu on toolbar -> Tools -> Extensions).
 4. Drag and Drop file github-search-chrome-extension.crx to the Extensions page.
@@ -26,23 +26,15 @@ Alternatively, you can follow these steps to install extension manually:
 
 
 ## Usage
-You can use 3  (standard) GitHub search boxes for perform searches across all repositories.
-Unfortunately, the top level basic search box (the one that is at the very top when you hit https://github.com) is not supported.
+You can now use 3 all GitHub search boxes for performing searches across all you (private/organization) repositories.
+Furthermore, you can pass query as a get parameter "q".
 
-YOU HAVE TO PREFIX YOUR SEARCH QUERY WITH "all:" to perform searches across all repositories. Otheriwse only standard github search is performed.
+YOU HAVE TO PREFIX YOUR SEARCH QUERY WITH "all:" to perform searches across all repositories.
+Otherwise only standard github search is performed.
 
 Example query (will search string 'HttpClient' in all organization's repositories):
     
     all:HttpClient
-
-### Advanced search box
-You can go to the advanced search box either by clicking the basic top level search box or directly via https://github.com/search/advanced.
-
-### Repository 'basic' search box (only in private repos)
-'Basic' search box is standard github widget which is able to search in one (private) repository. This is the one that is available at repository page.
-
-### Repository 'advanced' search box
-'Advanced' search box is the one where you are redirected after performing search via 'basic' search box.
 
 ### Video
 There is a short [introductory video](https://github.com/downloads/jumarko/github-search/github-search-code-repositories-in-action.mov) in Downloads section.

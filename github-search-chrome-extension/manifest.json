@@ -1,6 +1,6 @@
 {
     "name": "Github repositories code search",
-    "version": "0.2",
+    "version": "0.3",
     "homepage_url": "https://github.com/jumarko/github-search",
     "manifest_version": 2,
     "description": "Extension allows full text search across all GitHub organization's repositories.",
@@ -15,11 +15,16 @@
     "content_scripts": [
         {
             "matches": ["https://github.com/*"],
-            "css": ["search_on_page.css"],
-            "js": ["jquery-1.8.3.min.js", "jquery.blockUI.js", "search_on_page.js"]
+            "css": ["search_on_page.css", "jassert/css/jquery.alerts.css"],
+            "js": ["jquery-1.8.3.min.js", "jquery.blockUI.js",
+                        "jassert/js/jquery.ui.draggable.js", "jassert/js/jquery.alerts.js",
+                   "search_on_page.js"]
         }
     ],
     "permissions": [
         "https://github.com/*"
+    ],
+    "web_accessible_resources": [
+        "jassert/img/*.png"
     ]
 }
