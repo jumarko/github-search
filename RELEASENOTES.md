@@ -1,5 +1,8 @@
 #Github search code repositories extension - RELEASE NOTES
 
+## 0.4
+* Popup window with basic info added. Shown after left-click on extension icon.
+
 ## 0.3
 * Unified approch to search - always via URL GEt parameter "q".
 * Default timeout 60 seconds added to all AJAX calls to prevent from infinite waiting for data if connection is down.
